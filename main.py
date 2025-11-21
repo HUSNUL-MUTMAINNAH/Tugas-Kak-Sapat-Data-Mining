@@ -97,20 +97,57 @@ else:
                     prob_svm = model_svm.predict_proba(vec)[0]
                     prob_ensemble = model_ensemble.predict_proba(vec)[0]
 
-                    st.subheader("🎯 Hasil Analisis (Ensemble)")
+                except Exception as e:
+                    st.error(f"Terjadi kesalahan saat analisis: {e}")
+                    st.stop()
 
-                    max_prob = max(prob_ensemble) * 100
-                    conf_text, conf_type = get_confidence_badge(max_prob)
+            # ==============================
+            # BAGIAN HASIL ENSEMBLE
+            # ==============================
+            st.subheader("🎯 Hasil Analisis (Ensemble)")
 
-                    if pred_ensemble == "positive":
-                        st.success("### ✅ Sentimen: POSITIF")
-                    else:
-                        st.error("### ❌ Sentimen: NEGATIF")
+            max_prob = max(prob_ensemble) * 100
+            conf_text, conf_type = get_confidence_badge(max_prob)
 
-                    st.info(f"Tingkat Keyakinan: {conf_text} ({max_prob:.1f}%)")
+            if pred_ensemble == "positive":
+                st.success("### ✅ Sentimen: POSITIF")
+            else:
+                st.error("### ❌ Sentimen: NEGATIF")
 
-                    # Probabilitas
-                    st.write("📊 Probabilitas:")
-                    col1, col2 = st.columns(2)
-                    with col1:
-                        st.metric("Negatif", f"{prob_ensemble[0]*100:.1f}%")
+            st.info(f"Tingkat Keyakinan: {conf_text} ({max_prob:.1f}%)")
+
+            # Probabilitas
+            st.write("📊 Probabilitas:")
+            c1, c2 = st.columns(2)
+            with c1:
+                st.metric("Negatif", f"{prob_ensemble[0]*100:.1f}%")
+            with c2:
+                st.metric("Positif", f"{prob_ensemble[1]*100:.1f}%")
+
+            # ==============================
+            # BAGIAN PERBANDINGAN MODEL
+            # ==============================
+            if show_comparison:
+                st.subheader("📌 Perbandingan Model")
+
+                comp1, comp2, comp3 = st.columns(3)
+
+                with comp1:
+                    st.write("**BernoulliNB**")
+                    st.metric("Prediksi", pred_bnb)
+                    st.metric("Positif", f"{prob_bnb[1]*100:.1f}%")
+                with comp2:
+                    st.write("**SVM**")
+                    st.metric("Prediksi", pred_svm)
+                    st.metric("Positif", f"{prob_svm[1]*100:.1f}%")
+                with comp3:
+                    st.write("**Ensemble**")
+                    st.metric("Prediksi", pred_ensemble)
+                    st.metric("Positif", f"{prob_ensemble[1]*100:.1f}%")
+
+            # ==============================
+            # DETAIL PREPROCESSING
+            # ==============================
+            if show_details:
+                st.subheader("📝 Detail Preprocessing")
+                st.code(processed)
